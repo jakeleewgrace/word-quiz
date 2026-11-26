@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>오늘의 영단어 퀴즈</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="영단어 퀴즈">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffd84d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -19,7 +26,7 @@
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Gowun Dodum",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
-.wrap{max-width:640px;margin:0 auto;padding:18px max(4vw,14px) 48px}
+.wrap{max-width:640px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) max(4vw,14px) calc(48px + env(safe-area-inset-bottom))}
 h1{font:400 clamp(30px,7vw,42px)/1.05 "Do Hyeon",sans-serif;margin:6px 0 4px;text-wrap:balance}
 .sub{color:var(--mut);margin:0 0 16px}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
