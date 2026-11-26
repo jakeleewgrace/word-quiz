@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>공부하자</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -15,41 +15,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
 <style>
 /* VOICE: friendly study buddy, encouraging, beginner-level, never scolding
-   IDEA: a stack of sticky-note vocab cards on a desk
-   PICTURE: the quiz card itself, big word, four chunky answer tiles
+   IDEA: a stack of sticky-note vocab cards on a desk, with a stamp-card attendance sheet
+   PICTURE: the quiz card itself, big word, four chunky answer tiles; a month of stamps
    COLOUR and TYPE: sticky yellow ground, ink black, correction-pen red, blue tick; Do Hyeon + Nunito + Gowun Dodum
-   LAYOUT: one calm column, tab strip on top, card under it */
+   LAYOUT: one calm column, tab grid on top, card under it */
 :root{color-scheme:light dark;
 --bg:light-dark(#ffd84d,#1d1a12);--card:light-dark(#fffdf4,#2b2719);--ink:light-dark(#1b1a17,#f5efd9);
 --mut:light-dark(#6b6350,#b8ad8c);--line:light-dark(#e9dfbf,#433c28);--red:light-dark(#e23b2e,#ff6b5e);
---blue:light-dark(#1f5fd6,#7aa5ff);--ok:light-dark(#e3f0ff,#1c2d4d);--bad:light-dark(#ffe4e0,#4a1f1b);--tile:light-dark(#fff,#332e1f)}
+--blue:light-dark(#1f5fd6,#7aa5ff);--ok:light-dark(#e3f0ff,#1c2d4d);--bad:light-dark(#ffe4e0,#4a1f1b);--tile:light-dark(#fff,#332e1f);
+--warn:light-dark(#ff9f1c,#ffb347)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Gowun Dodum",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
 .wrap{max-width:640px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) max(4vw,14px) calc(48px + env(safe-area-inset-bottom))}
 h1{font:400 clamp(30px,7vw,42px)/1.05 "Do Hyeon",sans-serif;margin:6px 0 4px;text-wrap:balance}
 .sub{color:var(--mut);margin:0 0 16px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.tabs button{flex:1 1 0;min-height:44px;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:12px;font:400 17px "Do Hyeon",sans-serif;cursor:pointer;white-space:nowrap;padding:0 8px}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:16px}
+.tabs button{min-height:44px;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:12px;font:400 17px "Do Hyeon",sans-serif;cursor:pointer;white-space:nowrap;padding:0 6px}
 .tabs button[aria-selected=true]{background:var(--ink);color:var(--bg)}
 .badge{display:inline-block;min-width:22px;padding:0 6px;margin-left:4px;border-radius:11px;background:var(--red);color:#fff;font:800 13px/22px Nunito,sans-serif}
 .card{background:var(--card);border-radius:18px;padding:clamp(18px,4vw,28px);box-shadow:0 2px 0 var(--line),0 14px 30px -18px #0007;position:relative}
 .card+.card{margin-top:14px}
 h2{font:400 24px/1.2 "Do Hyeon",sans-serif;margin:0 0 10px}
+h3{font:400 19px/1.2 "Do Hyeon",sans-serif;margin:18px 0 8px}
 textarea{width:100%;min-height:230px;font:16px/1.6 "Gowun Dodum",monospace;padding:12px;border:2px solid var(--line);border-radius:12px;background:var(--tile);color:var(--ink);resize:vertical}
+textarea.small{min-height:90px}
 textarea:focus,button:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
 .btn{min-height:46px;padding:0 18px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font:400 18px "Do Hyeon",sans-serif;cursor:pointer}
 .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
 .btn.red{background:var(--red);color:#fff}
-.btn:disabled{opacity:.4;cursor:default}
-select{min-height:46px;border-radius:12px;border:2px solid var(--line);background:var(--tile);color:var(--ink);font:16px "Gowun Dodum",sans-serif;padding:0 10px}
+.btn.sm{min-height:38px;font-size:16px;padding:0 12px}
+.btn:disabled{opacity:.35;cursor:default}
+select{min-height:46px;border-radius:12px;border:2px solid var(--line);background:var(--tile);color:var(--ink);font:16px "Gowun Dodum",sans-serif;padding:0 10px;max-width:100%}
 .hint{color:var(--mut);font-size:14px;margin:8px 0 0}
 .msg{color:var(--red);font-size:15px;margin:8px 0 0;min-height:1em}
+details summary{cursor:pointer;font:400 18px "Do Hyeon",sans-serif;min-height:32px}
 /* quiz */
 .qtop{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--mut);font:800 14px Nunito,sans-serif}
 .bar{height:8px;background:var(--line);border-radius:4px;margin:10px 0 18px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ink);transition:width .3s}
 .dir{display:inline-block;background:var(--ink);color:var(--bg);border-radius:8px;padding:2px 10px;font:400 15px "Do Hyeon",sans-serif}
+.dir.final{background:var(--red);color:#fff}
 .prompt{font:800 clamp(30px,8vw,44px)/1.15 Nunito,"Do Hyeon",sans-serif;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
 .prompt.ko{font-family:"Do Hyeon",sans-serif;font-weight:400}
 .blank{display:inline-block;min-width:4.5em;border-bottom:4px solid var(--red);text-align:center;color:var(--red)}
@@ -62,32 +68,60 @@ select{min-height:46px;border-radius:12px;border:2px solid var(--line);backgroun
 .say{flex:none;width:56px;border:0;border-left:2px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center}
 .say svg,.sayb svg{width:24px;height:24px}
 .sayb{width:48px;height:48px;border-radius:50%;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;display:inline-grid;place-items:center;flex:none}
-.opt.right{border-color:var(--blue);background:var(--ok)}.opt.right .num{background:var(--blue);border-color:var(--blue);color:#fff}
-.opt.wrong{border-color:var(--red);background:var(--bad)}.opt.wrong .num{background:var(--red);border-color:var(--red);color:#fff}
-.opt:not(.done):active{transform:scale(.98)}
-.fb{margin-top:14px;font:400 20px "Do Hyeon",sans-serif;min-height:30px}
-.fb.ok{color:var(--blue)}.fb.no{color:var(--red)}
+.opt.sel{border-color:var(--ink);background:var(--ok)}.opt.sel .num{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.opt:active{transform:scale(.98)}
 .score{font:800 clamp(56px,16vw,88px)/1 Nunito,sans-serif;margin:8px 0}
+.stamp{display:inline-flex;align-items:center;gap:8px;border:3px solid var(--blue);color:var(--blue);border-radius:12px;padding:6px 12px;font:400 19px "Do Hyeon",sans-serif;transform:rotate(-3deg);margin:6px 0}
+.stamp.low{border-color:var(--warn);color:var(--warn)}
 /* lists */
 .list{list-style:none;margin:0;padding:0}
 .list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
-.list .w{flex:1}.list b{font:800 19px Nunito,sans-serif;display:block}.list span{color:var(--mut)}
+.list .w{flex:1}.list b{font:800 19px Nunito,sans-serif}.list span{color:var(--mut)}
+.meta{display:block;font-size:13px;color:var(--mut)}
 .cnt{font:800 13px Nunito,sans-serif;color:var(--red);white-space:nowrap}
-.x{width:44px;height:44px;border-radius:10px;border:0;background:transparent;color:var(--mut);font-size:22px;cursor:pointer}
+.got{font:400 13px "Do Hyeon",sans-serif;color:var(--blue);border:1.5px solid var(--blue);border-radius:6px;padding:0 5px;margin-left:4px;vertical-align:2px}
+.x{min-width:44px;height:44px;border-radius:10px;border:0;background:transparent;color:var(--mut);font-size:20px;cursor:pointer;white-space:nowrap}
+.x.ask{color:var(--red);font:400 15px "Do Hyeon",sans-serif}
 .empty{text-align:center;color:var(--mut);padding:28px 8px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:4px 0 14px}
+.stat{background:var(--tile);border:2px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font:800 clamp(22px,6vw,30px)/1.1 Nunito,sans-serif}
+.stat span{font-size:13px;color:var(--mut)}
+/* attendance calendar */
+.mnav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px}
+.mnav b{font:400 21px "Do Hyeon",sans-serif}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal .dow{text-align:center;font-size:13px;color:var(--mut)}
+.day{aspect-ratio:1;border-radius:10px;background:var(--tile);border:1.5px solid var(--line);display:grid;place-items:center;font:800 14px Nunito,sans-serif;color:var(--mut);position:relative}
+.day.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.day.low{background:var(--warn);border-color:var(--warn);color:#1b1a17}
+.day.today{outline:2.5px solid var(--ink);outline-offset:1px}
+.day.fut{opacity:.4}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--mut);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+/* final exam */
+.dots{display:flex;gap:10px;margin:12px 0}
+.dots i{width:40px;height:40px;border-radius:50%;border:3px solid var(--ink);display:grid;place-items:center;font:800 15px Nunito,sans-serif}
+.dots i.on{background:var(--red);border-color:var(--red);color:#fff}
 /* flashcards */
 .fc{perspective:1200px;height:clamp(240px,52vw,300px);margin:6px 0 14px;cursor:pointer}
 .fc .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
 .fc.flip .in{transform:rotateY(180deg)}
-.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;
 background:var(--tile);border:2px solid var(--line);background-image:repeating-linear-gradient(transparent 0 35px,var(--line) 35px 36px);background-position:0 18px}
 .face::before{content:"";position:absolute;top:0;bottom:0;left:36px;width:2px;background:var(--red);opacity:.35}
 .face.back{transform:rotateY(180deg)}
 .face .big{font:800 clamp(32px,9vw,48px)/1.1 Nunito,sans-serif;position:relative}
 .face .big.ko{font:400 clamp(30px,8vw,42px)/1.2 "Do Hyeon",sans-serif}
-.face small{color:var(--mut);position:relative}
-.fcnav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-@media(prefers-reduced-motion:reduce){.fc .in,.bar i,.opt{transition:none}}
+.face small,.face .ipa{color:var(--mut);position:relative}
+.face .ipa{font:16px Nunito,sans-serif}
+.fcnav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+/* modal */
+.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:20px;z-index:10}
+.modal .card{max-width:420px;width:100%;animation:pop .25s}
+.modal .big{font:400 34px/1.1 "Do Hyeon",sans-serif;color:var(--warn);margin:0 0 6px}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+@media(prefers-reduced-motion:reduce){.fc .in,.bar i,.opt{transition:none}.modal .card{animation:none}}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -99,8 +133,10 @@ background:var(--tile);border:2px solid var(--line);background-image:repeating-l
   <nav class="tabs" role="tablist">
     <button role="tab" id="t-input" data-v="input">단어 입력</button>
     <button role="tab" id="t-quiz" data-v="quiz">퀴즈</button>
+    <button role="tab" id="t-att" data-v="att">출석</button>
     <button role="tab" id="t-wrong" data-v="wrong">오답 노트<span class="badge" id="wcount" hidden>0</span></button>
     <button role="tab" id="t-cards" data-v="cards">플래시카드</button>
+    <button role="tab" id="t-final" data-v="final">종합시험</button>
   </nav>
 
   <!-- INPUT -->
@@ -120,7 +156,7 @@ highly 매우 대단히
 professional 전문적인 직업의
 interview 면접
 hire 고용하다</textarea>
-      <p class="hint">한 줄에 하나씩: <b>영어단어 뜻</b> (예: resume 이력서). 친구가 보낸 메시지를 그대로 붙여넣으면 돼요.</p>
+      <p class="hint">한 줄에 하나씩: <b>영어단어 뜻</b> (예: resume 이력서). 11개 이상이어야 정상 출석이에요. <span id="wc"></span></p>
       <div class="row">
         <select id="mode" aria-label="문제 방향">
           <option value="mix">영→한 + 한→영 섞어서</option>
@@ -132,50 +168,103 @@ hire 고용하다</textarea>
       </div>
       <p class="msg" id="imsg"></p>
     </div>
-  </section>
-
-  <!-- QUIZ -->
-  <section id="v-quiz" hidden>
-    <div class="card" id="qcard"></div>
-  </section>
-
-  <!-- WRONG -->
-  <section id="v-wrong" hidden>
     <div class="card">
-      <h2>오답 노트</h2>
-      <div id="wlist"></div>
-      <div class="row" id="wbtns">
-        <button class="btn" id="wcards">플래시카드로 복습</button>
-        <button class="btn ghost" id="wquiz">오답만 다시 풀기</button>
-        <button class="btn ghost" id="wclear">전체 비우기</button>
-      </div>
-      <p class="hint" id="wclearask" hidden>정말 다 지울까요? <button class="btn red" id="wclearyes" style="min-height:38px;margin-left:6px">네, 지우기</button></p>
+      <details>
+        <summary>발음 설정</summary>
+        <p class="hint">미국인 실제 녹음이 있는 단어는 녹음으로, 없으면 휴대폰의 미국 영어(en-US) 음성으로 읽어요.</p>
+        <div class="row">
+          <select id="voice" aria-label="미국 영어 음성"></select>
+          <select id="rate" aria-label="말하기 속도"><option value="0.75">느리게</option><option value="0.9">보통</option><option value="1">빠르게</option></select>
+          <button class="btn ghost sm" id="vtest">들어보기</button>
+        </div>
+        <label class="row" style="gap:10px"><input type="checkbox" id="rec" style="width:22px;height:22px"> 실제 녹음 사용 (끄면 기계 음성만)</label>
+      </details>
+    </div>
+    <div class="card">
+      <details>
+        <summary>기록 백업 · 복원</summary>
+        <p class="hint">출석·오답 노트는 이 휴대폰에만 저장돼요. 몇 달 동안 쓸 거라면 가끔 백업 코드를 복사해서 카톡 나에게 보내기 등에 저장해 두세요.</p>
+        <div class="row"><button class="btn ghost sm" id="bk">백업 코드 복사</button></div>
+        <textarea class="small" id="bkin" placeholder="백업 코드를 여기에 붙여넣고 복원을 누르세요" style="margin-top:10px"></textarea>
+        <div class="row"><button class="btn ghost sm" id="rs">복원</button></div>
+        <p class="msg" id="bkmsg"></p>
+      </details>
     </div>
   </section>
 
-  <!-- CARDS -->
-  <section id="v-cards" hidden>
-    <div class="card" id="ccard"></div>
+  <section id="v-quiz" hidden><div class="card" id="qcard"></div></section>
+  <section id="v-att" hidden><div class="card" id="acard"></div></section>
+
+  <section id="v-wrong" hidden>
+    <div class="card">
+      <h2>오답 노트</h2>
+      <div id="wstats"></div>
+      <div class="row" id="wfilters">
+        <select id="wper" aria-label="기간">
+          <option value="all">전체 기간</option>
+          <option value="7">최근 7일에 틀린 단어</option>
+          <option value="30">최근 30일에 틀린 단어</option>
+          <option value="o30">한 달 넘게 지난 단어</option>
+          <option value="o90">석 달 넘게 지난 단어</option>
+        </select>
+        <select id="wsort" aria-label="정렬">
+          <option value="last">최근 틀린 순</option>
+          <option value="n">많이 틀린 순</option>
+          <option value="abc">ABC 순</option>
+        </select>
+      </div>
+      <div class="row" id="wbtns">
+        <button class="btn" id="wquiz">이 단어들로 다시 시험</button>
+        <button class="btn ghost" id="wcards">플래시카드로 복습</button>
+      </div>
+      <div id="wlist" style="margin-top:8px"></div>
+      <div class="row" id="wclr"><button class="btn ghost sm" id="wclear">오답 노트 전체 비우기</button><span id="wclearask" hidden>정말 다 지울까요? <button class="btn red sm" id="wclearyes">네, 지우기</button></span></div>
+    </div>
   </section>
+
+  <section id="v-cards" hidden><div class="card" id="ccard"></div></section>
+  <section id="v-final" hidden><div class="card" id="fcard"></div></section>
 </div>
+<div class="modal" id="modal" hidden><div class="card" id="mcard"></div></div>
 
 <script>
 {
 const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
 const BANK=[["apple","사과"],["water","물"],["book","책"],["school","학교"],["friend","친구"],["happy","행복한"],["money","돈"],["time","시간"],["work","일하다"],["family","가족"],["house","집"],["eat","먹다"]];
+const MIN_WORDS=11,FINAL_EVERY=5;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>ymd(new Date());
+const ago=s=>Math.round((new Date(today())-new Date(s))/864e5);
+const md=s=>{const p=s.split('-');return (+p[1])+'/'+(+p[2])};
+const key=w=>w.en.toLowerCase();
 
-/* speech */
-let voice=null;
-const pickVoice=()=>{try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en-US/i.test(v.lang)&&/Samantha|Google|Natural/i.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||null}catch(e){}};
-if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
-const speak=t=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';if(voice)u.voice=voice;u.rate=.85;speechSynthesis.speak(u)}catch(e){}};
+/* ---------- pronunciation: real US recording first, then en-US voice ---------- */
+let voices=[],audioMap=load('vq_audio',{}),player=null;
+const PREF=[/Samantha/i,/Ava/i,/Allison/i,/Nicky/i,/Google US English/i,/Jenny|Aria|Guy/i,/Natural/i,/Alex/i,/Zira|David|Mark/i];
+const loadVoices=()=>{try{voices=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang))}catch(e){voices=[]}fillVoices()};
+const bestVoice=()=>{const n=load('vq_voice','');let v=voices.find(x=>x.name===n);if(v)return v;for(const r of PREF){v=voices.find(x=>r.test(x.name));if(v)return v}return voices[0]||null};
+const fillVoices=()=>{const s=$('voice'),b=bestVoice();s.innerHTML=voices.length?voices.map(v=>`<option${b&&v.name===b.name?' selected':''}>${esc(v.name)}</option>`).join(''):'<option>기본 미국 영어 음성</option>'};
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+const tts=t=>{try{speechSynthesis.cancel();if(!voices.length)loadVoices();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';const v=bestVoice();if(v)u.voice=v;u.rate=+load('vq_rate',0.9);speechSynthesis.speak(u)}catch(e){}};
+const useRec=()=>load('vq_rec',true);
+const fetchAudio=async en=>{const k=en.toLowerCase().trim();if(k in audioMap||!/^[a-z'-]+$/.test(k))return;
+  try{const r=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(k));
+    if(r.status===404){audioMap[k]={u:'',p:''};save('vq_audio',audioMap);return}if(!r.ok)return;
+    const j=await r.json();let u='',p='';
+    for(const e of j)for(const ph of e.phonetics||[]){if(!u&&/-us\.mp3$/i.test(ph.audio||'')){u=ph.audio;if(ph.text)p=ph.text}if(!p&&ph.text)p=ph.text}
+    if(!p&&j[0]&&j[0].phonetic)p=j[0].phonetic;audioMap[k]={u,p};save('vq_audio',audioMap)}catch(e){}};
+const prefetch=list=>{const q=[...new Set(list.map(w=>w.en))];const run=async()=>{while(q.length)await fetchAudio(q.shift())};run();run();run()};
+const speak=en=>{try{speechSynthesis.cancel()}catch(e){}if(player){try{player.pause()}catch(e){}player=null}
+  const a=audioMap[en.toLowerCase().trim()];
+  if(useRec()&&a&&a.u){player=new Audio(a.u);player.play().catch(()=>tts(en))}else{tts(en);fetchAudio(en)}};
+const ipa=en=>{const a=audioMap[en.toLowerCase().trim()];return a&&a.p?a.p:''};
 
-/* parse "resume 이력서" lines */
+/* ---------- parse "resume 이력서" ---------- */
 const parse=txt=>{const out=[],seen=new Set();
   for(let line of txt.split(/\r?\n/)){line=line.trim().replace(/^[-*\d.)\s]+(?=[A-Za-z])/,'');if(!line)continue;
     const m=line.match(/^([A-Za-z][A-Za-z'’\- .]*?)\s*[:=\-–]?\s*([가-힣(~].*)$/);if(!m)continue;
@@ -183,112 +272,187 @@ const parse=txt=>{const out=[],seen=new Set();
     if(!seen.has(en.toLowerCase())){seen.add(en.toLowerCase());out.push({en,ko})}}
   return out};
 
-/* state */
-let words=[],quiz=[],qi=0,score=0,roundWrong=[],answered=false;
-let wrong=load('vq_wrong',[]);
-let fcList=[],fi=0,fcFront='en';
+/* ---------- stored state ---------- */
+let wrong=load('vq_wrong',[]).map(x=>({first:today(),last:today(),ok:false,...x}));save('vq_wrong',wrong);
+let att=load('vq_att',{}),allWords=load('vq_all',[]),sinceFinal=load('vq_since',0);
+let quiz=null,fcList=[],fi=0,fcFront='en',calMonth=null;
 const saved=load('vq_words',null);if(saved)$('words').value=saved;
 
-const setBadge=()=>{$('wcount').textContent=wrong.length;$('wcount').hidden=!wrong.length};
-const addWrong=w=>{const f=wrong.find(x=>x.en.toLowerCase()===w.en.toLowerCase());
-  if(f){f.n++;f.ko=w.ko}else wrong.unshift({en:w.en,ko:w.ko,n:1});save('vq_wrong',wrong);setBadge()};
+const setBadge=()=>{const n=wrong.filter(w=>!w.ok).length;$('wcount').textContent=n;$('wcount').hidden=!n};
+const addWrong=w=>{const t=today(),f=wrong.find(x=>key(x)===key(w));
+  if(f){f.n++;f.ko=w.ko;f.last=t;f.ok=false;if(!f.dates)f.dates=[];if(!f.dates.includes(t))f.dates.push(t)}
+  else wrong.unshift({en:w.en,ko:w.ko,n:1,first:t,last:t,ok:false,dates:[t]});save('vq_wrong',wrong);setBadge()};
+const addAll=list=>{const t=today();for(const w of list){const f=allWords.find(x=>key(x)===key(w));if(f)f.ko=w.ko;else allWords.push({en:w.en,ko:w.ko,first:t})}save('vq_all',allWords)};
+const dayStatus=d=>!d?'':d.words>=MIN_WORDS?'on':'low';
 
-/* views */
-const show=v=>{for(const s of ['input','quiz','wrong','cards']){$('v-'+s).hidden=s!==v;$('t-'+s).setAttribute('aria-selected',s===v)}
-  if(v==='wrong')renderWrong();if(v==='cards'&&!fcList.length)startCards(wrong);if(v==='cards')renderCard();if(v==='quiz'&&!quiz.length)renderQuizEmpty()};
+/* ---------- modal ---------- */
+const modal=(html,btns)=>{$('mcard').innerHTML=html+`<div class="row">${btns.map((b,i)=>`<button class="btn ${b[2]||''}" data-m="${i}">${b[0]}</button>`).join('')}</div>`;$('modal').hidden=false;
+  $('mcard').querySelectorAll('[data-m]').forEach(el=>el.onclick=()=>{$('modal').hidden=true;const f=btns[el.dataset.m][1];if(f)f()});
+  const first=$('mcard').querySelector('[data-m]');if(first)first.focus({preventScroll:true})};
+
+/* ---------- views ---------- */
+const VIEWS=['input','quiz','att','wrong','cards','final'];
+const show=v=>{for(const s of VIEWS){$('v-'+s).hidden=s!==v;$('t-'+s).setAttribute('aria-selected',s===v)}
+  if(v==='wrong')renderWrong();if(v==='att')renderAtt();if(v==='final')renderFinal();
+  if(v==='cards'){if(!fcList.length)startCards(wrong.filter(w=>!w.ok));renderCard()}
+  if(v==='quiz'&&!quiz)renderQuizEmpty();window.scrollTo(0,0)};
 document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
 
-/* build quiz */
-const build=(list,mode)=>{const pool=list.concat(BANK.filter(([e])=>!list.some(w=>w.en.toLowerCase()===e)).map(([en,ko])=>({en,ko})));
-  const qs=[];
-  for(const w of list){let dirs=mode==='both'?['ek','ke']:mode==='ek'?['ek']:mode==='ke'?['ke']:[Math.random()<.5?'ek':'ke'];
-    for(const d of dirs){const others=shuf(list.filter(x=>x!==w));const extra=shuf(pool.filter(x=>x!==w&&!list.includes(x)));
-      const dist=others.concat(extra).filter(x=>x.ko!==w.ko&&x.en!==w.en).slice(0,3);
+/* ---------- build quiz: no same word back to back ---------- */
+const noRepeat=qs=>{for(let t=0;t<300;t++){const s=shuf(qs);if(s.every((q,i)=>!i||key(s[i-1].w)!==key(q.w)))return s}
+  const m=new Map();for(const q of shuf(qs)){const k=key(q.w);if(!m.has(k))m.set(k,[]);m.get(k).push(q)}
+  const out=[];let last=null;while(out.length<qs.length){const c=[...m.entries()].filter(([k,a])=>a.length&&k!==last).sort((a,b)=>b[1].length-a[1].length);
+    const p=c[0]||[...m.entries()].find(([,a])=>a.length);out.push(p[1].pop());last=p[0]}return out};
+const build=(list,mode)=>{const extraPool=BANK.filter(([e])=>!list.some(w=>key(w)===e)).map(([en,ko])=>({en,ko}));
+  const distPool=allWords.filter(a=>!list.some(w=>key(w)===key(a))).concat(extraPool);const qs=[];
+  for(const w of list){const dirs=mode==='both'?['ek','ke']:mode==='ek'?['ek']:mode==='ke'?['ke']:[Math.random()<.5?'ek':'ke'];
+    for(const d of dirs){const dist=shuf(list.filter(x=>x!==w)).concat(shuf(distPool)).filter(x=>x.ko!==w.ko&&key(x)!==key(w)).slice(0,3);
       qs.push({w,d,opts:shuf([w,...dist])})}}
-  return shuf(qs)};
+  return noRepeat(qs)};
+const TYPE_LABEL={normal:'오늘의 시험',wrong:'오답 다시 풀기',final:'종합시험'};
+const startQuiz=(list,mode,type)=>{quiz={type,list,qs:build(list,mode),i:0,ans:[],sel:-1};prefetch(quiz.qs.flatMap(q=>q.opts));show('quiz');renderQ()};
 
-const startQuiz=(list,mode)=>{quiz=build(list,mode);qi=0;score=0;roundWrong=[];show('quiz');renderQ()};
-
-$('start').addEventListener('click',()=>{words=parse($('words').value);save('vq_words',$('words').value);
+$('words').addEventListener('input',()=>{const n=parse($('words').value).length;$('wc').textContent=n?`지금 ${n}개`:''});
+$('start').addEventListener('click',()=>{const words=parse($('words').value);save('vq_words',$('words').value);
   if(!words.length){$('imsg').textContent='단어를 찾지 못했어요. "resume 이력서"처럼 한 줄에 하나씩 적어주세요.';return}
-  $('imsg').textContent='';startQuiz(words,$('mode').value)});
+  $('imsg').textContent='';const go=()=>startQuiz(words,$('mode').value,'normal');
+  if(words.length<MIN_WORDS)modal(`<p class="big">공부량 부족!</p><p>오늘 단어가 <b>${words.length}개</b>밖에 안 돼요. 하루 <b>${MIN_WORDS}개 이상</b> 공부해야 정상 출석이에요.</p><p class="hint">이대로 시험 보면 출석부에 주황색 '부족'으로 찍혀요.</p>`,[['단어 더 넣기',()=>$('words').focus()],['그래도 시작',go,'ghost']]);
+  else go()});
 
 const renderQuizEmpty=()=>{$('qcard').innerHTML='<div class="empty"><h2>아직 퀴즈가 없어요</h2><p>단어 입력 탭에서 단어를 넣고 시작해 주세요.</p><button class="btn" id="goin">단어 입력하러 가기</button></div>';$('goin').onclick=()=>show('input')};
 
-const renderQ=()=>{if(qi>=quiz.length)return renderResult();
-  answered=false;const q=quiz[qi],ek=q.d==='ek';
+const renderQ=()=>{const z=quiz;if(z.i>=z.qs.length)return finish(false);
+  z.sel=-1;const q=z.qs[z.i],ek=q.d==='ek';
   const prompt=ek
-    ?`<div class="prompt"><span>${esc(q.w.en)}</span><button class="sayb" id="psay" aria-label="${esc(q.w.en)} 발음 듣기">${SPK}</button></div><div class="prompt ko"><span class="eq">=</span><span class="blank" id="blank">?</span></div>`
-    :`<div class="prompt ko"><span>${esc(q.w.ko)}</span></div><div class="prompt"><span class="eq">=</span><span class="blank" id="blank">?</span></div>`;
-  $('qcard').innerHTML=`<div class="qtop"><span class="dir">${ek?'영어 → 한국어':'한국어 → 영어'}</span><span>${qi+1} / ${quiz.length} · 맞힌 개수 ${score}</span></div>
-   <div class="bar"><i style="width:${qi/quiz.length*100}%"></i></div>
+    ?`<div class="prompt"><span>${esc(q.w.en)}</span><button class="sayb" id="psay" aria-label="${esc(q.w.en)} 발음 듣기">${SPK}</button></div><div class="prompt ko"><span class="eq">=</span><span class="blank">?</span></div>`
+    :`<div class="prompt ko"><span>${esc(q.w.ko)}</span></div><div class="prompt"><span class="eq">=</span><span class="blank">?</span></div>`;
+  $('qcard').innerHTML=`<div class="qtop"><span class="dir ${z.type==='final'?'final':''}">${TYPE_LABEL[z.type]} · ${ek?'영→한':'한→영'}</span><span>${z.i+1} / ${z.qs.length}</span></div>
+   <div class="bar"><i style="width:${z.i/z.qs.length*100}%"></i></div>
    <div>빈칸에 알맞은 ${ek?'뜻':'영어 단어'}을 고르세요</div>${prompt}
    <div class="opts">${q.opts.map((o,i)=>`<div class="opt" id="o${i}"><button class="pick ${ek?'':'en'}" data-i="${i}"><span class="num">${i+1}</span><span>${esc(ek?o.ko:o.en)}</span></button><button class="say" data-s="${i}" aria-label="${esc(o.en)} 발음 듣기">${SPK}</button></div>`).join('')}</div>
-   <div class="fb" id="fb" aria-live="polite"></div>
-   <div class="row" id="nextrow" hidden><button class="btn" id="next">${qi+1<quiz.length?'다음 문제':'결과 보기'}</button></div>`;
+   <div class="row"><button class="btn" id="next" disabled style="flex:1">${z.i+1<z.qs.length?'다음 문제':'제출하기'}</button><button class="btn ghost" id="quit">그만하기</button></div>
+   <p class="hint">정답은 끝나고 오답 노트에서 확인할 수 있어요.</p>`;
   if(ek){$('psay').onclick=()=>speak(q.w.en);speak(q.w.en)}
   $('qcard').querySelectorAll('.say').forEach(b=>b.onclick=()=>speak(q.opts[b.dataset.s].en));
   $('qcard').querySelectorAll('.pick').forEach(b=>b.onclick=()=>choose(+b.dataset.i));
-  $('next').onclick=()=>{qi++;renderQ()}};
+  $('next').onclick=next;
+  $('quit').onclick=()=>modal('<h2>여기서 그만할까요?</h2><p>지금까지 푼 문제만 채점해요. 끝까지 안 풀면 출석은 안 찍혀요.</p>',[['계속 풀기',null],['그만하기',()=>finish(true),'ghost']])};
+const choose=i=>{quiz.sel=i;quiz.qs[quiz.i].opts.forEach((_,k)=>$('o'+k).classList.toggle('sel',k===i));$('next').disabled=false};
+const next=()=>{const z=quiz;if(z.sel<0)return;const q=z.qs[z.i];z.ans.push({w:q.w,ok:q.opts[z.sel]===q.w});z.i++;renderQ()};
 
-const choose=i=>{const q=quiz[qi],o=q.opts[i];
-  if(answered){speak(o.en);return}
-  answered=true;const ci=q.opts.indexOf(q.w),ok=o===q.w;
-  q.opts.forEach((_,k)=>$('o'+k).classList.add('done'));
-  $('o'+ci).classList.add('right');if(!ok)$('o'+i).classList.add('wrong');
-  $('blank').textContent=q.d==='ek'?q.w.ko:q.w.en;
-  const fb=$('fb');
-  if(ok){score++;fb.className='fb ok';fb.textContent='정답! 잘했어요'}
-  else{fb.className='fb no';fb.textContent=`아쉬워요. 정답은 ${q.w.en} = ${q.w.ko} (오답 노트에 저장했어요)`;
-    addWrong(q.w);if(!roundWrong.includes(q.w))roundWrong.push(q.w)}
-  speak(q.w.en);$('nextrow').hidden=false;$('next').focus({preventScroll:true})};
+const finish=partial=>{const z=quiz;const n=z.ans.length,score=z.ans.filter(a=>a.ok).length;
+  const wrongW=[];for(const a of z.ans)if(!a.ok&&!wrongW.includes(a.w)){wrongW.push(a.w);addWrong(a.w)}
+  let stamp='';
+  if(!partial&&n){if(z.type!=='wrong')addAll(z.list);
+    const t=today(),d=att[t]||{words:0,quizzes:0,best:0,total:0};d.quizzes++;d.words=Math.max(d.words,z.list.length);
+    if(score/n>=(d.total?d.best/d.total:-1)){d.best=score;d.total=n}att[t]=d;save('vq_att',att);
+    if(z.type==='normal'){sinceFinal++;save('vq_since',sinceFinal)}if(z.type==='final'){sinceFinal=0;save('vq_since',sinceFinal)}
+    stamp=dayStatus(d)==='on'?'<span class="stamp">오늘 출석 완료</span>':`<span class="stamp low">출석: 공부량 부족 (${d.words}단어)</span>`}
+  quiz=null;
+  if(!n){show('input');return}
+  const pct=Math.round(score/n*100);
+  const msg=pct===100?'완벽해요! 다 맞혔어요':pct>=70?'좋아요! 조금만 더 하면 완벽':pct>=40?'괜찮아요, 틀린 단어만 다시 보면 돼요':'처음엔 다 그래요. 카드로 한 번 더 봐요';
+  const left=FINAL_EVERY-sinceFinal;
+  $('qcard').innerHTML=`<h2>${partial?'중간 결과':'시험 끝!'}</h2>${stamp}<div class="score">${score}<span style="font-size:.4em;color:var(--mut)"> / ${n}</span></div><p>${msg}</p>
+   ${wrongW.length?`<p>틀린 단어 <b>${wrongW.length}개</b>는 오답 노트에 저장했어요. 어떤 걸 틀렸는지 오답 노트에서 확인해 보세요.</p>`:''}
+   <p class="hint">${left<=0?'종합시험이 열렸어요!':`종합시험까지 오늘의 시험 ${left}번 남았어요.`}</p>
+   <div class="row">${wrongW.length?'<button class="btn" id="rnote">오답 노트 보기</button>':''}${left<=0?'<button class="btn red" id="rfinal">종합시험 보러 가기</button>':''}<button class="btn ghost" id="ratt">출석부 보기</button></div>`;
+  if(wrongW.length)$('rnote').onclick=()=>{$('wper').value='all';$('wsort').value='last';show('wrong')};
+  if(left<=0)$('rfinal').onclick=()=>show('final');
+  $('ratt').onclick=()=>show('att');
+  if(!partial&&n&&z.list.length<MIN_WORDS&&z.type==='normal')setTimeout(()=>modal(`<p class="big">공부량 부족!</p><p>오늘은 ${z.list.length}단어만 공부했어요. 내일은 ${MIN_WORDS}개 이상 해 봐요.</p>`,[['알겠어요',null]]),400)};
 
-const renderResult=()=>{const pct=Math.round(score/quiz.length*100);
-  const msg=pct===100?'완벽해요! 오늘 단어 마스터':pct>=70?'좋아요! 조금만 더 하면 완벽':pct>=40?'괜찮아요, 틀린 단어만 다시 보면 돼요':'처음엔 다 그래요. 카드로 한 번 더 봐요';
-  $('qcard').innerHTML=`<h2>오늘의 결과</h2><div class="score">${score}<span style="font-size:.4em;color:var(--mut)"> / ${quiz.length}</span></div><p>${msg}</p>
-   ${roundWrong.length?`<h2 style="margin-top:18px">이번에 틀린 단어</h2><ul class="list">${roundWrong.map((w,i)=>`<li><button class="sayb" data-r="${i}" aria-label="${esc(w.en)} 발음 듣기">${SPK}</button><div class="w"><b>${esc(w.en)}</b><span>${esc(w.ko)}</span></div></li>`).join('')}</ul>`:''}
-   <div class="row">${roundWrong.length?'<button class="btn" id="rcards">틀린 단어 카드로 외우기</button><button class="btn ghost" id="rretry">틀린 것만 다시 풀기</button>':''}<button class="btn ghost" id="ragain">처음부터 다시</button></div>`;
-  $('qcard').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>speak(roundWrong[b.dataset.r].en));
-  if(roundWrong.length){const rw=roundWrong.slice();$('rcards').onclick=()=>{startCards(rw);show('cards')};$('rretry').onclick=()=>startQuiz(rw,'mix')}
-  $('ragain').onclick=()=>{words=parse($('words').value);if(words.length)startQuiz(words,$('mode').value);else show('input')}};
+/* ---------- attendance ---------- */
+const streak=()=>{let s=0,d=new Date();if(!att[ymd(d)])d.setDate(d.getDate()-1);while(att[ymd(d)]){s++;d.setDate(d.getDate()-1)}return s};
+const monthStats=(y,m)=>{const now=new Date(),first=Object.keys(att).sort()[0];let days=0,on=0,low=0;const last=new Date(y,m+1,0).getDate();
+  for(let i=1;i<=last;i++){const dt=new Date(y,m,i),k=ymd(dt);if(dt>now)break;if(!first||k<first)continue;days++;const s=dayStatus(att[k]);if(s==='on')on++;else if(s==='low')low++}
+  return {days,on,low,rate:days?Math.round(on/days*100):0}};
+const renderAtt=()=>{const now=new Date();if(!calMonth)calMonth=[now.getFullYear(),now.getMonth()];const [y,m]=calMonth;
+  const st=monthStats(y,m),t=today(),td=att[t],sum=Object.keys(att).length;
+  const startDow=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();let cells='';
+  for(let i=0;i<startDow;i++)cells+='<div></div>';
+  for(let i=1;i<=last;i++){const dt=new Date(y,m,i),k=ymd(dt),s=dayStatus(att[k]);
+    cells+=`<div class="day ${s} ${k===t?'today':''} ${dt>now?'fut':''}" title="${att[k]?att[k].words+'단어':''}">${i}</div>`}
+  $('acard').innerHTML=`<h2>출석부</h2>
+   <p>${td?(dayStatus(td)==='on'?`<span class="stamp">오늘 출석 완료 · ${td.words}단어</span>`:`<span class="stamp low">오늘 공부량 부족 · ${td.words}단어</span>`):'<span class="hint">오늘은 아직 시험을 안 봤어요.</span>'}</p>
+   <div class="stats"><div class="stat"><b>${st.rate}%</b><span>${m+1}월 출석률</span></div><div class="stat"><b>${streak()}일</b><span>연속 출석</span></div><div class="stat"><b>${sum}일</b><span>총 공부한 날</span></div></div>
+   <div class="mnav"><button class="btn ghost sm" id="mprev" aria-label="이전 달">‹</button><b>${y}년 ${m+1}월</b><button class="btn ghost sm" id="mnext" aria-label="다음 달">›</button></div>
+   <div class="cal">${['일','월','화','수','목','금','토'].map(d=>`<div class="dow">${d}</div>`).join('')}${cells}</div>
+   <div class="legend"><span><i style="background:var(--blue)"></i>출석 (${MIN_WORDS}단어 이상)</span><span><i style="background:var(--warn)"></i>공부량 부족</span></div>
+   <p class="hint">${m+1}월: 출석 ${st.on}일 · 부족 ${st.low}일 · 결석 ${Math.max(0,st.days-st.on-st.low)}일 (기록 시작 이후 ${st.days}일 중). 출석률은 ${MIN_WORDS}단어 이상 공부한 날만 세요.</p>
+   <div class="row"><button class="btn" id="report">출석 리포트 복사</button></div><p class="msg" id="rmsg" style="color:var(--blue)"></p>`;
+  $('mprev').onclick=()=>{calMonth=m?[y,m-1]:[y-1,11];renderAtt()};$('mnext').onclick=()=>{calMonth=m<11?[y,m+1]:[y+1,0];renderAtt()};
+  $('report').onclick=()=>{const ns=monthStats(now.getFullYear(),now.getMonth());
+    const txt=`[공부하자] ${now.getMonth()+1}월 ${now.getDate()}일 출석 리포트\n오늘: ${td?(dayStatus(td)==='on'?'출석':'공부량 부족')+` (${td.words}단어, 시험 ${td.quizzes}회, 최고 ${td.best}/${td.total})`:'아직 안 함'}\n${now.getMonth()+1}월 출석률: ${ns.rate}% (출석 ${ns.on}일 · 부족 ${ns.low}일 / ${ns.days}일)\n연속 출석: ${streak()}일\n오답 노트: ${wrong.length}단어 (아직 못 외움 ${wrong.filter(w=>!w.ok).length})`;
+    copy(txt,$('rmsg'),'복사했어요. 카톡에 붙여넣어 보내세요.')}};
+const copy=(txt,el,okMsg)=>{const done=()=>{el.textContent=okMsg};
+  try{navigator.clipboard.writeText(txt).then(done,()=>fallback())}catch(e){fallback()}
+  function fallback(){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){el.textContent='복사가 안 돼요. 길게 눌러 직접 복사해 주세요.'}ta.remove()}};
 
-/* wrong notes */
-const renderWrong=()=>{$('wbtns').hidden=!wrong.length;$('wclearask').hidden=true;
-  $('wlist').innerHTML=wrong.length?`<p class="hint" style="margin-top:0">틀린 횟수가 많은 단어일수록 더 자주 보세요. 카드에서 "외웠어요"를 누르면 여기서 빠져요.</p><ul class="list">${wrong.map((w,i)=>`<li><button class="sayb" data-w="${i}" aria-label="${esc(w.en)} 발음 듣기">${SPK}</button><div class="w"><b>${esc(w.en)}</b><span>${esc(w.ko)}</span></div><span class="cnt">${w.n}번 틀림</span><button class="x" data-d="${i}" aria-label="${esc(w.en)} 삭제">×</button></li>`).join('')}</ul>`
-    :'<div class="empty"><h2>오답 노트가 비어 있어요</h2><p>퀴즈에서 틀린 단어가 여기에 모여요.</p></div>';
+/* ---------- wrong notes (kept permanently) ---------- */
+const filtered=()=>{const p=$('wper').value;let l=wrong.filter(w=>p==='all'?true:p==='7'?ago(w.last)<=7:p==='30'?ago(w.last)<=30:p==='o30'?ago(w.last)>30:ago(w.last)>90);
+  const s=$('wsort').value;l=l.slice().sort((a,b)=>s==='n'?b.n-a.n:s==='abc'?a.en.localeCompare(b.en):b.last.localeCompare(a.last));return l};
+let delAsk=null;
+const renderWrong=()=>{const l=filtered(),has=wrong.length;
+  $('wstats').innerHTML=has?`<div class="stats"><div class="stat"><b>${wrong.length}</b><span>전체 오답</span></div><div class="stat"><b>${wrong.filter(w=>!w.ok).length}</b><span>아직 못 외움</span></div><div class="stat"><b>${wrong.filter(w=>w.n>=3).length}</b><span>3번 이상 틀림</span></div></div>`:'';
+  $('wfilters').hidden=$('wbtns').hidden=$('wclr').hidden=!has;$('wclearask').hidden=true;
+  $('wquiz').disabled=$('wcards').disabled=!l.length;
+  $('wlist').innerHTML=!has?'<div class="empty"><h2>오답 노트가 비어 있어요</h2><p>시험에서 틀린 단어가 날짜와 함께 여기에 쌓여요. 몇 달 뒤에도 다시 시험 볼 수 있어요.</p></div>'
+    :!l.length?'<div class="empty">이 기간에 해당하는 단어가 없어요.</div>'
+    :`<ul class="list">${l.map(w=>{const i=wrong.indexOf(w);return `<li><button class="sayb" data-w="${i}" aria-label="${esc(w.en)} 발음 듣기">${SPK}</button><div class="w"><b>${esc(w.en)}</b>${w.ok?'<span class="got">외움</span>':''} <span>${esc(w.ko)}</span><span class="meta">처음 틀림 ${md(w.first)} · 최근 ${md(w.last)}</span></div><span class="cnt">${w.n}번</span><button class="x ${delAsk===i?'ask':''}" data-d="${i}" aria-label="${esc(w.en)} 삭제">${delAsk===i?'삭제?':'×'}</button></li>`}).join('')}</ul>`;
   $('wlist').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>speak(wrong[b.dataset.w].en));
-  $('wlist').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{wrong.splice(+b.dataset.d,1);save('vq_wrong',wrong);setBadge();renderWrong()})};
-$('wcards').onclick=()=>{startCards(wrong);show('cards')};
-$('wquiz').onclick=()=>startQuiz(wrong.map(w=>({en:w.en,ko:w.ko})),'mix');
+  $('wlist').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const i=+b.dataset.d;if(delAsk===i){wrong.splice(i,1);save('vq_wrong',wrong);setBadge();delAsk=null}else delAsk=i;renderWrong()});
+  prefetch(l)};
+$('wper').onchange=$('wsort').onchange=()=>{delAsk=null;renderWrong()};
+$('wquiz').onclick=()=>{const l=filtered();if(l.length)startQuiz(l.map(w=>({en:w.en,ko:w.ko})),'mix','wrong')};
+$('wcards').onclick=()=>{const l=filtered();if(l.length){startCards(l);show('cards')}};
 $('wclear').onclick=()=>{$('wclearask').hidden=false};
 $('wclearyes').onclick=()=>{wrong=[];save('vq_wrong',wrong);setBadge();renderWrong()};
 
-/* flashcards */
-const startCards=list=>{fcList=shuf(list.map(w=>({en:w.en,ko:w.ko})));fi=0};
+/* ---------- flashcards ---------- */
+const startCards=list=>{fcList=shuf(list.map(w=>({en:w.en,ko:w.ko})));fi=0;prefetch(fcList)};
 const renderCard=()=>{const c=$('ccard');
-  if(!fcList.length){c.innerHTML=`<div class="empty"><h2>복습할 카드가 없어요</h2><p>${wrong.length?'오답 노트의 단어로 카드를 만들 수 있어요.':'퀴즈에서 틀린 단어가 생기면 카드가 만들어져요.'}</p>${wrong.length?'<button class="btn" id="fromw">오답 노트로 카드 만들기</button>':''}</div>`;
-    if(wrong.length)$('fromw').onclick=()=>{startCards(wrong);renderCard()};return}
-  if(fi>=fcList.length)fi=fcList.length-1;const w=fcList[fi],enF=fcFront==='en';
-  const enFace=`<div class="big">${esc(w.en)}</div><button class="sayb" id="csay" aria-label="발음 듣기">${SPK}</button>`,koFace=`<div class="big ko">${esc(w.ko)}</div>`;
+  if(!fcList.length){const todo=wrong.filter(w=>!w.ok);c.innerHTML=`<div class="empty"><h2>복습할 카드가 없어요</h2><p>${todo.length?'오답 노트의 못 외운 단어로 카드를 만들 수 있어요.':'시험에서 틀린 단어가 생기면 카드가 만들어져요.'}</p>${todo.length?'<button class="btn" id="fromw">못 외운 단어로 카드 만들기</button>':''}</div>`;
+    if(todo.length)$('fromw').onclick=()=>{startCards(todo);renderCard()};return}
+  if(fi>=fcList.length)fi=fcList.length-1;const w=fcList[fi],enF=fcFront==='en',p=ipa(w.en);
+  const enFace=`<div class="big">${esc(w.en)}</div>${p?`<div class="ipa">${esc(p)}</div>`:''}<button class="sayb" id="csay" aria-label="발음 듣기">${SPK}</button>`,koFace=`<div class="big ko">${esc(w.ko)}</div>`;
   c.innerHTML=`<div class="qtop"><span class="dir">플래시카드</span><span>${fi+1} / ${fcList.length}</span></div>
    <div class="fc" id="fc" role="button" tabindex="0" aria-label="카드 뒤집기"><div class="in">
     <div class="face">${enF?enFace:koFace}<small>탭해서 뒤집기</small></div>
     <div class="face back">${enF?koFace:enFace}<small>${enF?'뜻':'영어'}</small></div></div></div>
    <div class="fcnav"><button class="btn ghost" id="prev" ${fi?'':'disabled'}>이전</button><button class="btn" id="got">외웠어요</button><button class="btn ghost" id="nxt">${fi+1<fcList.length?'다음':'처음으로'}</button></div>
    <div class="row"><button class="btn ghost" id="side" style="flex:1">${enF?'한국어 먼저 보기':'영어 먼저 보기'}</button><button class="btn ghost" id="mix" style="flex:1">섞기</button></div>
-   <p class="hint">"외웠어요"를 누르면 오답 노트에서도 빠져요.</p>`;
+   <p class="hint">"외웠어요"를 누르면 카드에서 빠지고, 오답 노트에는 '외움' 표시로 계속 남아요.</p>`;
   const fc=$('fc');const flip=()=>fc.classList.toggle('flip');
   fc.onclick=e=>{if(e.target.closest('#csay'))return;flip()};fc.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();flip()}};
   c.querySelectorAll('#csay').forEach(b=>b.onclick=e=>{e.stopPropagation();speak(w.en)});
   if(enF)speak(w.en);
   $('prev').onclick=()=>{fi--;renderCard()};$('nxt').onclick=()=>{fi=(fi+1)%fcList.length;renderCard()};
-  $('got').onclick=()=>{wrong=wrong.filter(x=>x.en.toLowerCase()!==w.en.toLowerCase());save('vq_wrong',wrong);setBadge();fcList.splice(fi,1);renderCard()};
+  $('got').onclick=()=>{const f=wrong.find(x=>key(x)===key(w));if(f){f.ok=true;save('vq_wrong',wrong);setBadge()}fcList.splice(fi,1);renderCard()};
   $('side').onclick=()=>{fcFront=enF?'ko':'en';renderCard()};$('mix').onclick=()=>{fcList=shuf(fcList);fi=0;renderCard()}};
 
-document.addEventListener('keydown',e=>{if(e.target.tagName==='TEXTAREA')return;
-  if(!$('v-quiz').hidden&&quiz.length&&qi<quiz.length){const n=+e.key;if(n>=1&&n<=4)choose(n-1)}
+/* ---------- final exam: every 5 tests, all words ever studied ---------- */
+const renderFinal=()=>{const done=Math.min(sinceFinal,FINAL_EVERY),open=sinceFinal>=FINAL_EVERY;
+  $('fcard').innerHTML=`<h2>종합시험</h2><p>오늘의 시험을 <b>${FINAL_EVERY}번</b> 볼 때마다 열려요. 지금까지 공부한 <b>모든 단어 ${allWords.length}개</b>가 무작위로 나와요.</p>
+   <div class="dots">${Array.from({length:FINAL_EVERY},(_,i)=>`<i class="${i<done?'on':''}">${i+1}</i>`).join('')}</div>
+   ${open?`<div class="row"><button class="btn red" id="fgo">종합시험 시작 (${allWords.length}문제)</button></div><p class="hint">단어가 많으면 시간이 걸려요. 중간에 그만하면 푼 데까지만 채점하고, 다시 열린 상태로 남아요.</p>`
+     :`<p class="hint">${FINAL_EVERY-done}번 더 보면 열려요. (오답 다시 풀기는 횟수에 안 들어가요)</p>`}`;
+  if(open)$('fgo').onclick=()=>startQuiz(allWords.map(w=>({en:w.en,ko:w.ko})),'mix','final')};
+
+/* ---------- settings & backup ---------- */
+$('voice').onchange=()=>save('vq_voice',$('voice').value);
+$('rate').value=String(load('vq_rate',0.9));$('rate').onchange=()=>save('vq_rate',+$('rate').value);
+$('rec').checked=useRec();$('rec').onchange=()=>save('vq_rec',$('rec').checked);
+$('vtest').onclick=()=>speak('interview');
+const KEYS=['vq_wrong','vq_att','vq_all','vq_since','vq_words'];
+$('bk').onclick=()=>{const o={};for(const k of KEYS)o[k]=load(k,null);copy(JSON.stringify(o),$('bkmsg'),'백업 코드를 복사했어요. 안전한 곳에 붙여넣어 두세요.')};
+$('rs').onclick=()=>{try{const o=JSON.parse($('bkin').value);if(!o||!('vq_wrong' in o))throw 0;for(const k of KEYS)if(o[k]!=null)save(k,o[k]);location.reload()}catch(e){$('bkmsg').textContent='백업 코드가 올바르지 않아요.'}};
+
+document.addEventListener('keydown',e=>{if(/TEXTAREA|SELECT|INPUT/.test(e.target.tagName)||!$('modal').hidden)return;
+  if(!$('v-quiz').hidden&&quiz&&quiz.i<quiz.qs.length){const n=+e.key;if(n>=1&&n<=4)choose(n-1);else if(e.key==='Enter'&&e.target.tagName!=='BUTTON')next()}
   if(!$('v-cards').hidden&&fcList.length){if(e.key==='ArrowRight')$('nxt').click();if(e.key==='ArrowLeft'&&fi)$('prev').click()}});
 
+$('wc').textContent=`지금 ${parse($('words').value).length}개`;
 setBadge();show('input');
 }
 </script>
