@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘의 영단어 퀴즈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: friendly study buddy, encouraging, beginner-level, never scolding
+   IDEA: a stack of sticky-note vocab cards on a desk
+   PICTURE: the quiz card itself, big word, four chunky answer tiles
+   COLOUR and TYPE: sticky yellow ground, ink black, correction-pen red, blue tick; Do Hyeon + Nunito + Gowun Dodum
+   LAYOUT: one calm column, tab strip on top, card under it */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffd84d,#1d1a12);--card:light-dark(#fffdf4,#2b2719);--ink:light-dark(#1b1a17,#f5efd9);
+--mut:light-dark(#6b6350,#b8ad8c);--line:light-dark(#e9dfbf,#433c28);--red:light-dark(#e23b2e,#ff6b5e);
+--blue:light-dark(#1f5fd6,#7aa5ff);--ok:light-dark(#e3f0ff,#1c2d4d);--bad:light-dark(#ffe4e0,#4a1f1b);--tile:light-dark(#fff,#332e1f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Gowun Dodum",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;padding:18px max(4vw,14px) 48px}
+h1{font:400 clamp(30px,7vw,42px)/1.05 "Do Hyeon",sans-serif;margin:6px 0 4px;text-wrap:balance}
+.sub{color:var(--mut);margin:0 0 16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tabs button{flex:1 1 0;min-height:44px;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:12px;font:400 17px "Do Hyeon",sans-serif;cursor:pointer;white-space:nowrap;padding:0 8px}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg)}
+.badge{display:inline-block;min-width:22px;padding:0 6px;margin-left:4px;border-radius:11px;background:var(--red);color:#fff;font:800 13px/22px Nunito,sans-serif}
+.card{background:var(--card);border-radius:18px;padding:clamp(18px,4vw,28px);box-shadow:0 2px 0 var(--line),0 14px 30px -18px #0007;position:relative}
+.card+.card{margin-top:14px}
+h2{font:400 24px/1.2 "Do Hyeon",sans-serif;margin:0 0 10px}
+textarea{width:100%;min-height:230px;font:16px/1.6 "Gowun Dodum",monospace;padding:12px;border:2px solid var(--line);border-radius:12px;background:var(--tile);color:var(--ink);resize:vertical}
+textarea:focus,button:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.btn{min-height:46px;padding:0 18px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font:400 18px "Do Hyeon",sans-serif;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+.btn.red{background:var(--red);color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+select{min-height:46px;border-radius:12px;border:2px solid var(--line);background:var(--tile);color:var(--ink);font:16px "Gowun Dodum",sans-serif;padding:0 10px}
+.hint{color:var(--mut);font-size:14px;margin:8px 0 0}
+.msg{color:var(--red);font-size:15px;margin:8px 0 0;min-height:1em}
+/* quiz */
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--mut);font:800 14px Nunito,sans-serif}
+.bar{height:8px;background:var(--line);border-radius:4px;margin:10px 0 18px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ink);transition:width .3s}
+.dir{display:inline-block;background:var(--ink);color:var(--bg);border-radius:8px;padding:2px 10px;font:400 15px "Do Hyeon",sans-serif}
+.prompt{font:800 clamp(30px,8vw,44px)/1.15 Nunito,"Do Hyeon",sans-serif;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
+.prompt.ko{font-family:"Do Hyeon",sans-serif;font-weight:400}
+.blank{display:inline-block;min-width:4.5em;border-bottom:4px solid var(--red);text-align:center;color:var(--red)}
+.eq{color:var(--mut);font-weight:400}
+.opts{display:grid;gap:10px;margin-top:18px}
+.opt{display:flex;align-items:stretch;border:2px solid var(--line);border-radius:14px;background:var(--tile);overflow:hidden;transition:transform .12s}
+.opt .pick{flex:1;text-align:left;min-height:58px;padding:10px 14px;border:0;background:transparent;color:var(--ink);font:400 20px "Gowun Dodum",sans-serif;cursor:pointer;display:flex;align-items:center;gap:12px}
+.opt .pick.en{font:800 21px Nunito,sans-serif}
+.opt .num{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font:800 14px Nunito,sans-serif;color:var(--mut)}
+.say{flex:none;width:56px;border:0;border-left:2px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.say svg,.sayb svg{width:24px;height:24px}
+.sayb{width:48px;height:48px;border-radius:50%;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;display:inline-grid;place-items:center;flex:none}
+.opt.right{border-color:var(--blue);background:var(--ok)}.opt.right .num{background:var(--blue);border-color:var(--blue);color:#fff}
+.opt.wrong{border-color:var(--red);background:var(--bad)}.opt.wrong .num{background:var(--red);border-color:var(--red);color:#fff}
+.opt:not(.done):active{transform:scale(.98)}
+.fb{margin-top:14px;font:400 20px "Do Hyeon",sans-serif;min-height:30px}
+.fb.ok{color:var(--blue)}.fb.no{color:var(--red)}
+.score{font:800 clamp(56px,16vw,88px)/1 Nunito,sans-serif;margin:8px 0}
+/* lists */
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.list .w{flex:1}.list b{font:800 19px Nunito,sans-serif;display:block}.list span{color:var(--mut)}
+.cnt{font:800 13px Nunito,sans-serif;color:var(--red);white-space:nowrap}
+.x{width:44px;height:44px;border-radius:10px;border:0;background:transparent;color:var(--mut);font-size:22px;cursor:pointer}
+.empty{text-align:center;color:var(--mut);padding:28px 8px}
+/* flashcards */
+.fc{perspective:1200px;height:clamp(240px,52vw,300px);margin:6px 0 14px;cursor:pointer}
+.fc .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.fc.flip .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;
+background:var(--tile);border:2px solid var(--line);background-image:repeating-linear-gradient(transparent 0 35px,var(--line) 35px 36px);background-position:0 18px}
+.face::before{content:"";position:absolute;top:0;bottom:0;left:36px;width:2px;background:var(--red);opacity:.35}
+.face.back{transform:rotateY(180deg)}
+.face .big{font:800 clamp(32px,9vw,48px)/1.1 Nunito,sans-serif;position:relative}
+.face .big.ko{font:400 clamp(30px,8vw,42px)/1.2 "Do Hyeon",sans-serif}
+.face small{color:var(--mut);position:relative}
+.fcnav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(prefers-reduced-motion:reduce){.fc .in,.bar i,.opt{transition:none}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>오늘의 영단어 퀴즈</h1>
+  <p class="sub">단어를 붙여넣고, 4지선다로 풀고, 틀린 건 카드로 다시 외우기.</p>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="t-input" data-v="input">단어 입력</button>
+    <button role="tab" id="t-quiz" data-v="quiz">퀴즈</button>
+    <button role="tab" id="t-wrong" data-v="wrong">오답 노트<span class="badge" id="wcount" hidden>0</span></button>
+    <button role="tab" id="t-cards" data-v="cards">플래시카드</button>
+  </nav>
+
+  <!-- INPUT -->
+  <section id="v-input" hidden>
+    <div class="card">
+      <h2>오늘 공부한 단어</h2>
+      <textarea id="words" spellcheck="false" aria-label="단어 목록">resume 이력서
+opening 공석 결원
+several 몇몇의
+applicant 지원자 신청자
+requirement 필요조건 요건
+meet 만족시키다
+qualified 자격있는 적격의
+candidate 지원자 후보자
+confidence 확신 자신
+highly 매우 대단히
+professional 전문적인 직업의
+interview 면접
+hire 고용하다</textarea>
+      <p class="hint">한 줄에 하나씩: <b>영어단어 뜻</b> (예: resume 이력서). 친구가 보낸 메시지를 그대로 붙여넣으면 돼요.</p>
+      <div class="row">
+        <select id="mode" aria-label="문제 방향">
+          <option value="mix">영→한 + 한→영 섞어서</option>
+          <option value="both">단어마다 두 방향 모두</option>
+          <option value="ek">영→한만</option>
+          <option value="ke">한→영만</option>
+        </select>
+        <button class="btn" id="start">퀴즈 시작</button>
+      </div>
+      <p class="msg" id="imsg"></p>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="v-quiz" hidden>
+    <div class="card" id="qcard"></div>
+  </section>
+
+  <!-- WRONG -->
+  <section id="v-wrong" hidden>
+    <div class="card">
+      <h2>오답 노트</h2>
+      <div id="wlist"></div>
+      <div class="row" id="wbtns">
+        <button class="btn" id="wcards">플래시카드로 복습</button>
+        <button class="btn ghost" id="wquiz">오답만 다시 풀기</button>
+        <button class="btn ghost" id="wclear">전체 비우기</button>
+      </div>
+      <p class="hint" id="wclearask" hidden>정말 다 지울까요? <button class="btn red" id="wclearyes" style="min-height:38px;margin-left:6px">네, 지우기</button></p>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section id="v-cards" hidden>
+    <div class="card" id="ccard"></div>
+  </section>
+</div>
+
+<script>
+{
+const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+const BANK=[["apple","사과"],["water","물"],["book","책"],["school","학교"],["friend","친구"],["happy","행복한"],["money","돈"],["time","시간"],["work","일하다"],["family","가족"],["house","집"],["eat","먹다"]];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+
+/* speech */
+let voice=null;
+const pickVoice=()=>{try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en-US/i.test(v.lang)&&/Samantha|Google|Natural/i.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||null}catch(e){}};
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+const speak=t=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';if(voice)u.voice=voice;u.rate=.85;speechSynthesis.speak(u)}catch(e){}};
+
+/* parse "resume 이력서" lines */
+const parse=txt=>{const out=[],seen=new Set();
+  for(let line of txt.split(/\r?\n/)){line=line.trim().replace(/^[-*\d.)\s]+(?=[A-Za-z])/,'');if(!line)continue;
+    const m=line.match(/^([A-Za-z][A-Za-z'’\- .]*?)\s*[:=\-–]?\s*([가-힣(~].*)$/);if(!m)continue;
+    const en=m[1].trim(),ko=m[2].trim().split(/\s*[,/·]\s*|\s+/).filter(Boolean).join(', ');
+    if(!seen.has(en.toLowerCase())){seen.add(en.toLowerCase());out.push({en,ko})}}
+  return out};
+
+/* state */
+let words=[],quiz=[],qi=0,score=0,roundWrong=[],answered=false;
+let wrong=load('vq_wrong',[]);
+let fcList=[],fi=0,fcFront='en';
+const saved=load('vq_words',null);if(saved)$('words').value=saved;
+
+const setBadge=()=>{$('wcount').textContent=wrong.length;$('wcount').hidden=!wrong.length};
+const addWrong=w=>{const f=wrong.find(x=>x.en.toLowerCase()===w.en.toLowerCase());
+  if(f){f.n++;f.ko=w.ko}else wrong.unshift({en:w.en,ko:w.ko,n:1});save('vq_wrong',wrong);setBadge()};
+
+/* views */
+const show=v=>{for(const s of ['input','quiz','wrong','cards']){$('v-'+s).hidden=s!==v;$('t-'+s).setAttribute('aria-selected',s===v)}
+  if(v==='wrong')renderWrong();if(v==='cards'&&!fcList.length)startCards(wrong);if(v==='cards')renderCard();if(v==='quiz'&&!quiz.length)renderQuizEmpty()};
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+
+/* build quiz */
+const build=(list,mode)=>{const pool=list.concat(BANK.filter(([e])=>!list.some(w=>w.en.toLowerCase()===e)).map(([en,ko])=>({en,ko})));
+  const qs=[];
+  for(const w of list){let dirs=mode==='both'?['ek','ke']:mode==='ek'?['ek']:mode==='ke'?['ke']:[Math.random()<.5?'ek':'ke'];
+    for(const d of dirs){const others=shuf(list.filter(x=>x!==w));const extra=shuf(pool.filter(x=>x!==w&&!list.includes(x)));
+      const dist=others.concat(extra).filter(x=>x.ko!==w.ko&&x.en!==w.en).slice(0,3);
+      qs.push({w,d,opts:shuf([w,...dist])})}}
+  return shuf(qs)};
+
+const startQuiz=(list,mode)=>{quiz=build(list,mode);qi=0;score=0;roundWrong=[];show('quiz');renderQ()};
+
+$('start').addEventListener('click',()=>{words=parse($('words').value);save('vq_words',$('words').value);
+  if(!words.length){$('imsg').textContent='단어를 찾지 못했어요. "resume 이력서"처럼 한 줄에 하나씩 적어주세요.';return}
+  $('imsg').textContent='';startQuiz(words,$('mode').value)});
+
+const renderQuizEmpty=()=>{$('qcard').innerHTML='<div class="empty"><h2>아직 퀴즈가 없어요</h2><p>단어 입력 탭에서 단어를 넣고 시작해 주세요.</p><button class="btn" id="goin">단어 입력하러 가기</button></div>';$('goin').onclick=()=>show('input')};
+
+const renderQ=()=>{if(qi>=quiz.length)return renderResult();
+  answered=false;const q=quiz[qi],ek=q.d==='ek';
+  const prompt=ek
+    ?`<div class="prompt"><span>${esc(q.w.en)}</span><button class="sayb" id="psay" aria-label="${esc(q.w.en)} 발음 듣기">${SPK}</button></div><div class="prompt ko"><span class="eq">=</span><span class="blank" id="blank">?</span></div>`
+    :`<div class="prompt ko"><span>${esc(q.w.ko)}</span></div><div class="prompt"><span class="eq">=</span><span class="blank" id="blank">?</span></div>`;
+  $('qcard').innerHTML=`<div class="qtop"><span class="dir">${ek?'영어 → 한국어':'한국어 → 영어'}</span><span>${qi+1} / ${quiz.length} · 맞힌 개수 ${score}</span></div>
+   <div class="bar"><i style="width:${qi/quiz.length*100}%"></i></div>
+   <div>빈칸에 알맞은 ${ek?'뜻':'영어 단어'}을 고르세요</div>${prompt}
+   <div class="opts">${q.opts.map((o,i)=>`<div class="opt" id="o${i}"><button class="pick ${ek?'':'en'}" data-i="${i}"><span class="num">${i+1}</span><span>${esc(ek?o.ko:o.en)}</span></button><button class="say" data-s="${i}" aria-label="${esc(o.en)} 발음 듣기">${SPK}</button></div>`).join('')}</div>
+   <div class="fb" id="fb" aria-live="polite"></div>
+   <div class="row" id="nextrow" hidden><button class="btn" id="next">${qi+1<quiz.length?'다음 문제':'결과 보기'}</button></div>`;
+  if(ek){$('psay').onclick=()=>speak(q.w.en);speak(q.w.en)}
+  $('qcard').querySelectorAll('.say').forEach(b=>b.onclick=()=>speak(q.opts[b.dataset.s].en));
+  $('qcard').querySelectorAll('.pick').forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+  $('next').onclick=()=>{qi++;renderQ()}};
+
+const choose=i=>{const q=quiz[qi],o=q.opts[i];
+  if(answered){speak(o.en);return}
+  answered=true;const ci=q.opts.indexOf(q.w),ok=o===q.w;
+  q.opts.forEach((_,k)=>$('o'+k).classList.add('done'));
+  $('o'+ci).classList.add('right');if(!ok)$('o'+i).classList.add('wrong');
+  $('blank').textContent=q.d==='ek'?q.w.ko:q.w.en;
+  const fb=$('fb');
+  if(ok){score++;fb.className='fb ok';fb.textContent='정답! 잘했어요'}
+  else{fb.className='fb no';fb.textContent=`아쉬워요. 정답은 ${q.w.en} = ${q.w.ko} (오답 노트에 저장했어요)`;
+    addWrong(q.w);if(!roundWrong.includes(q.w))roundWrong.push(q.w)}
+  speak(q.w.en);$('nextrow').hidden=false;$('next').focus({preventScroll:true})};
+
+const renderResult=()=>{const pct=Math.round(score/quiz.length*100);
+  const msg=pct===100?'완벽해요! 오늘 단어 마스터':pct>=70?'좋아요! 조금만 더 하면 완벽':pct>=40?'괜찮아요, 틀린 단어만 다시 보면 돼요':'처음엔 다 그래요. 카드로 한 번 더 봐요';
+  $('qcard').innerHTML=`<h2>오늘의 결과</h2><div class="score">${score}<span style="font-size:.4em;color:var(--mut)"> / ${quiz.length}</span></div><p>${msg}</p>
+   ${roundWrong.length?`<h2 style="margin-top:18px">이번에 틀린 단어</h2><ul class="list">${roundWrong.map((w,i)=>`<li><button class="sayb" data-r="${i}" aria-label="${esc(w.en)} 발음 듣기">${SPK}</button><div class="w"><b>${esc(w.en)}</b><span>${esc(w.ko)}</span></div></li>`).join('')}</ul>`:''}
+   <div class="row">${roundWrong.length?'<button class="btn" id="rcards">틀린 단어 카드로 외우기</button><button class="btn ghost" id="rretry">틀린 것만 다시 풀기</button>':''}<button class="btn ghost" id="ragain">처음부터 다시</button></div>`;
+  $('qcard').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>speak(roundWrong[b.dataset.r].en));
+  if(roundWrong.length){const rw=roundWrong.slice();$('rcards').onclick=()=>{startCards(rw);show('cards')};$('rretry').onclick=()=>startQuiz(rw,'mix')}
+  $('ragain').onclick=()=>{words=parse($('words').value);if(words.length)startQuiz(words,$('mode').value);else show('input')}};
+
+/* wrong notes */
+const renderWrong=()=>{$('wbtns').hidden=!wrong.length;$('wclearask').hidden=true;
+  $('wlist').innerHTML=wrong.length?`<p class="hint" style="margin-top:0">틀린 횟수가 많은 단어일수록 더 자주 보세요. 카드에서 "외웠어요"를 누르면 여기서 빠져요.</p><ul class="list">${wrong.map((w,i)=>`<li><button class="sayb" data-w="${i}" aria-label="${esc(w.en)} 발음 듣기">${SPK}</button><div class="w"><b>${esc(w.en)}</b><span>${esc(w.ko)}</span></div><span class="cnt">${w.n}번 틀림</span><button class="x" data-d="${i}" aria-label="${esc(w.en)} 삭제">×</button></li>`).join('')}</ul>`
+    :'<div class="empty"><h2>오답 노트가 비어 있어요</h2><p>퀴즈에서 틀린 단어가 여기에 모여요.</p></div>';
+  $('wlist').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>speak(wrong[b.dataset.w].en));
+  $('wlist').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{wrong.splice(+b.dataset.d,1);save('vq_wrong',wrong);setBadge();renderWrong()})};
+$('wcards').onclick=()=>{startCards(wrong);show('cards')};
+$('wquiz').onclick=()=>startQuiz(wrong.map(w=>({en:w.en,ko:w.ko})),'mix');
+$('wclear').onclick=()=>{$('wclearask').hidden=false};
+$('wclearyes').onclick=()=>{wrong=[];save('vq_wrong',wrong);setBadge();renderWrong()};
+
+/* flashcards */
+const startCards=list=>{fcList=shuf(list.map(w=>({en:w.en,ko:w.ko})));fi=0};
+const renderCard=()=>{const c=$('ccard');
+  if(!fcList.length){c.innerHTML=`<div class="empty"><h2>복습할 카드가 없어요</h2><p>${wrong.length?'오답 노트의 단어로 카드를 만들 수 있어요.':'퀴즈에서 틀린 단어가 생기면 카드가 만들어져요.'}</p>${wrong.length?'<button class="btn" id="fromw">오답 노트로 카드 만들기</button>':''}</div>`;
+    if(wrong.length)$('fromw').onclick=()=>{startCards(wrong);renderCard()};return}
+  if(fi>=fcList.length)fi=fcList.length-1;const w=fcList[fi],enF=fcFront==='en';
+  const enFace=`<div class="big">${esc(w.en)}</div><button class="sayb" id="csay" aria-label="발음 듣기">${SPK}</button>`,koFace=`<div class="big ko">${esc(w.ko)}</div>`;
+  c.innerHTML=`<div class="qtop"><span class="dir">플래시카드</span><span>${fi+1} / ${fcList.length}</span></div>
+   <div class="fc" id="fc" role="button" tabindex="0" aria-label="카드 뒤집기"><div class="in">
+    <div class="face">${enF?enFace:koFace}<small>탭해서 뒤집기</small></div>
+    <div class="face back">${enF?koFace:enFace}<small>${enF?'뜻':'영어'}</small></div></div></div>
+   <div class="fcnav"><button class="btn ghost" id="prev" ${fi?'':'disabled'}>이전</button><button class="btn" id="got">외웠어요</button><button class="btn ghost" id="nxt">${fi+1<fcList.length?'다음':'처음으로'}</button></div>
+   <div class="row"><button class="btn ghost" id="side" style="flex:1">${enF?'한국어 먼저 보기':'영어 먼저 보기'}</button><button class="btn ghost" id="mix" style="flex:1">섞기</button></div>
+   <p class="hint">"외웠어요"를 누르면 오답 노트에서도 빠져요.</p>`;
+  const fc=$('fc');const flip=()=>fc.classList.toggle('flip');
+  fc.onclick=e=>{if(e.target.closest('#csay'))return;flip()};fc.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();flip()}};
+  c.querySelectorAll('#csay').forEach(b=>b.onclick=e=>{e.stopPropagation();speak(w.en)});
+  if(enF)speak(w.en);
+  $('prev').onclick=()=>{fi--;renderCard()};$('nxt').onclick=()=>{fi=(fi+1)%fcList.length;renderCard()};
+  $('got').onclick=()=>{wrong=wrong.filter(x=>x.en.toLowerCase()!==w.en.toLowerCase());save('vq_wrong',wrong);setBadge();fcList.splice(fi,1);renderCard()};
+  $('side').onclick=()=>{fcFront=enF?'ko':'en';renderCard()};$('mix').onclick=()=>{fcList=shuf(fcList);fi=0;renderCard()}};
+
+document.addEventListener('keydown',e=>{if(e.target.tagName==='TEXTAREA')return;
+  if(!$('v-quiz').hidden&&quiz.length&&qi<quiz.length){const n=+e.key;if(n>=1&&n<=4)choose(n-1)}
+  if(!$('v-cards').hidden&&fcList.length){if(e.key==='ArrowRight')$('nxt').click();if(e.key==='ArrowLeft'&&fi)$('prev').click()}});
+
+setBadge();show('input');
+}
+</script>
+</body>
+</html>
