@@ -97,6 +97,24 @@ details summary{cursor:pointer;font:400 18px "Do Hyeon",sans-serif;min-height:32
 .day.low{background:var(--warn);border-color:var(--warn);color:#1b1a17}
 .day.today{outline:2.5px solid var(--ink);outline-offset:1px}
 .day.fut{opacity:.4}
+button.day{cursor:pointer;padding:0;font:800 14px Nunito,sans-serif}
+.day.has:not(.on):not(.low){border-color:var(--ink);color:var(--ink)}
+.day.pick{box-shadow:0 0 0 3px var(--red)}
+.day.pick::after{content:"";position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/12px no-repeat}
+.selbar{background:var(--tile);border:2px solid var(--ink);border-radius:14px;padding:12px 14px;margin-top:14px}
+.selbar p{margin:0 0 4px}
+.dlist{list-style:none;margin:0;padding:0}
+.dlist>li{border-bottom:1px dashed var(--line);padding:6px 0}
+.dhead{display:flex;align-items:center;gap:10px;min-height:48px}
+.dhead input{width:24px;height:24px;accent-color:var(--red);flex:none}
+.dhead label{flex:1;cursor:pointer}
+.dhead label b{font:400 18px "Do Hyeon",sans-serif}
+.chip{white-space:nowrap;display:inline-block;font:400 13px "Do Hyeon",sans-serif;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px;color:#fff;background:var(--blue)}
+.chip.low{background:var(--warn);color:#1b1a17}.chip.none{background:var(--line);color:var(--mut)}
+.wtog{border:0;background:transparent;color:var(--blue);font:400 16px "Do Hyeon",sans-serif;min-height:44px;cursor:pointer;white-space:nowrap}
+.dwords{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 10px 34px}
+.dwords button{border:1.5px solid var(--line);background:var(--tile);color:var(--ink);border-radius:10px;padding:6px 10px;font:16px "Gowun Dodum",sans-serif;cursor:pointer;text-align:left}
+.dwords b{font:800 15px Nunito,sans-serif}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--mut);margin-top:10px}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 /* final exam */
@@ -275,6 +293,10 @@ const parse=txt=>{const out=[],seen=new Set();
 /* ---------- stored state ---------- */
 let wrong=load('vq_wrong',[]).map(x=>({first:today(),last:today(),ok:false,...x}));save('vq_wrong',wrong);
 let att=load('vq_att',{}),allWords=load('vq_all',[]),sinceFinal=load('vq_since',0);
+let days=load('vq_days',null);
+if(!days){days={};for(const w of allWords){(days[w.first]=days[w.first]||[]).push({en:w.en,ko:w.ko})}save('vq_days',days)}
+const selDays=new Set();
+const recordDay=list=>{const t=today(),a=days[t]||[];for(const w of list){const f=a.find(x=>key(x)===key(w));if(f)f.ko=w.ko;else a.push({en:w.en,ko:w.ko})}days[t]=a;save('vq_days',days)};
 let quiz=null,fcList=[],fi=0,fcFront='en',calMonth=null;
 const saved=load('vq_words',null);if(saved)$('words').value=saved;
 
@@ -309,13 +331,13 @@ const build=(list,mode)=>{const extraPool=BANK.filter(([e])=>!list.some(w=>key(w
     for(const d of dirs){const dist=shuf(list.filter(x=>x!==w)).concat(shuf(distPool)).filter(x=>x.ko!==w.ko&&key(x)!==key(w)).slice(0,3);
       qs.push({w,d,opts:shuf([w,...dist])})}}
   return noRepeat(qs)};
-const TYPE_LABEL={normal:'오늘의 시험',wrong:'오답 다시 풀기',final:'종합시험'};
+const TYPE_LABEL={normal:'오늘의 시험',wrong:'오답 다시 풀기',final:'종합시험',days:'날짜별 복습'};
 const startQuiz=(list,mode,type)=>{quiz={type,list,qs:build(list,mode),i:0,ans:[],sel:-1};prefetch(quiz.qs.flatMap(q=>q.opts));show('quiz');renderQ()};
 
 $('words').addEventListener('input',()=>{const n=parse($('words').value).length;$('wc').textContent=n?`지금 ${n}개`:''});
 $('start').addEventListener('click',()=>{const words=parse($('words').value);save('vq_words',$('words').value);
   if(!words.length){$('imsg').textContent='단어를 찾지 못했어요. "resume 이력서"처럼 한 줄에 하나씩 적어주세요.';return}
-  $('imsg').textContent='';const go=()=>startQuiz(words,$('mode').value,'normal');
+  $('imsg').textContent='';const go=()=>{recordDay(words);startQuiz(words,$('mode').value,'normal')};
   if(words.length<MIN_WORDS)modal(`<p class="big">공부량 부족!</p><p>오늘 단어가 <b>${words.length}개</b>밖에 안 돼요. 하루 <b>${MIN_WORDS}개 이상</b> 공부해야 정상 출석이에요.</p><p class="hint">이대로 시험 보면 출석부에 주황색 '부족'으로 찍혀요.</p>`,[['단어 더 넣기',()=>$('words').focus()],['그래도 시작',go,'ghost']]);
   else go()});
 
@@ -343,8 +365,8 @@ const next=()=>{const z=quiz;if(z.sel<0)return;const q=z.qs[z.i];z.ans.push({w:q
 const finish=partial=>{const z=quiz;const n=z.ans.length,score=z.ans.filter(a=>a.ok).length;
   const wrongW=[];for(const a of z.ans)if(!a.ok&&!wrongW.includes(a.w)){wrongW.push(a.w);addWrong(a.w)}
   let stamp='';
-  if(!partial&&n){if(z.type!=='wrong')addAll(z.list);
-    const t=today(),d=att[t]||{words:0,quizzes:0,best:0,total:0};d.quizzes++;d.words=Math.max(d.words,z.list.length);
+  if(!partial&&n){if(z.type==='normal')addAll(z.list);
+    const t=today(),d=att[t]||{words:0,quizzes:0,best:0,total:0};d.quizzes++;if(z.type==='normal')d.words=Math.max(d.words,(days[t]||z.list).length);
     if(score/n>=(d.total?d.best/d.total:-1)){d.best=score;d.total=n}att[t]=d;save('vq_att',att);
     if(z.type==='normal'){sinceFinal++;save('vq_since',sinceFinal)}if(z.type==='final'){sinceFinal=0;save('vq_since',sinceFinal)}
     stamp=dayStatus(d)==='on'?'<span class="stamp">오늘 출석 완료</span>':`<span class="stamp low">출석: 공부량 부족 (${d.words}단어)</span>`}
@@ -367,21 +389,45 @@ const streak=()=>{let s=0,d=new Date();if(!att[ymd(d)])d.setDate(d.getDate()-1);
 const monthStats=(y,m)=>{const now=new Date(),first=Object.keys(att).sort()[0];let days=0,on=0,low=0;const last=new Date(y,m+1,0).getDate();
   for(let i=1;i<=last;i++){const dt=new Date(y,m,i),k=ymd(dt);if(dt>now)break;if(!first||k<first)continue;days++;const s=dayStatus(att[k]);if(s==='on')on++;else if(s==='low')low++}
   return {days,on,low,rate:days?Math.round(on/days*100):0}};
+const DOW=['일','월','화','수','목','금','토'];
+const longDate=k=>{const d=new Date(k+'T00:00');return `${d.getMonth()+1}월 ${d.getDate()}일 (${DOW[d.getDay()]})`};
+const selWords=()=>{const out=[],seen=new Set();for(const k of [...selDays].sort())for(const w of days[k]||[])if(!seen.has(key(w))){seen.add(key(w));out.push(w)}return out};
+const openDays=new Set();
 const renderAtt=()=>{const now=new Date();if(!calMonth)calMonth=[now.getFullYear(),now.getMonth()];const [y,m]=calMonth;
   const st=monthStats(y,m),t=today(),td=att[t],sum=Object.keys(att).length;
   const startDow=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();let cells='';
   for(let i=0;i<startDow;i++)cells+='<div></div>';
-  for(let i=1;i<=last;i++){const dt=new Date(y,m,i),k=ymd(dt),s=dayStatus(att[k]);
-    cells+=`<div class="day ${s} ${k===t?'today':''} ${dt>now?'fut':''}" title="${att[k]?att[k].words+'단어':''}">${i}</div>`}
+  for(let i=1;i<=last;i++){const dt=new Date(y,m,i),k=ymd(dt),s=dayStatus(att[k]),has=(days[k]||[]).length;
+    const cls=`day ${s} ${has?'has':''} ${k===t?'today':''} ${dt>now?'fut':''} ${selDays.has(k)?'pick':''}`;
+    cells+=has?`<button class="${cls}" data-k="${k}" aria-pressed="${selDays.has(k)}" aria-label="${longDate(k)} ${has}단어">${i}</button>`:`<div class="${cls}">${i}</div>`}
+  const sw=selWords(),dayKeys=Object.keys(days).filter(k=>days[k].length).sort().reverse();
   $('acard').innerHTML=`<h2>출석부</h2>
    <p>${td?(dayStatus(td)==='on'?`<span class="stamp">오늘 출석 완료 · ${td.words}단어</span>`:`<span class="stamp low">오늘 공부량 부족 · ${td.words}단어</span>`):'<span class="hint">오늘은 아직 시험을 안 봤어요.</span>'}</p>
    <div class="stats"><div class="stat"><b>${st.rate}%</b><span>${m+1}월 출석률</span></div><div class="stat"><b>${streak()}일</b><span>연속 출석</span></div><div class="stat"><b>${sum}일</b><span>총 공부한 날</span></div></div>
    <div class="mnav"><button class="btn ghost sm" id="mprev" aria-label="이전 달">‹</button><b>${y}년 ${m+1}월</b><button class="btn ghost sm" id="mnext" aria-label="다음 달">›</button></div>
-   <div class="cal">${['일','월','화','수','목','금','토'].map(d=>`<div class="dow">${d}</div>`).join('')}${cells}</div>
+   <div class="cal">${DOW.map(d=>`<div class="dow">${d}</div>`).join('')}${cells}</div>
    <div class="legend"><span><i style="background:var(--blue)"></i>출석 (${MIN_WORDS}단어 이상)</span><span><i style="background:var(--warn)"></i>공부량 부족</span></div>
-   <p class="hint">${m+1}월: 출석 ${st.on}일 · 부족 ${st.low}일 · 결석 ${Math.max(0,st.days-st.on-st.low)}일 (기록 시작 이후 ${st.days}일 중). 출석률은 ${MIN_WORDS}단어 이상 공부한 날만 세요.</p>
+   <p class="hint">날짜를 누르면 체크돼요. 여러 날을 체크하면 그 날들의 단어를 합쳐서 시험 볼 수 있어요.</p>
+   <div class="selbar" ${selDays.size?'':'hidden'}>
+     <p><b>${[...selDays].sort().map(k=>md(k)).join(', ')}</b> 체크됨 · 단어 ${sw.length}개</p>
+     <div class="dwords" style="padding-left:0">${sw.map((w,i)=>`<button data-sw="${i}"><b>${esc(w.en)}</b> ${esc(w.ko)}</button>`).join('')}</div>
+     <div class="row" style="margin-top:4px"><button class="btn" id="dquiz" style="flex:1 1 100%">이 단어들로 시험 보기</button><button class="btn ghost" id="dcards" style="flex:1">카드로 보기</button><button class="btn ghost" id="dclear" style="flex:1">해제</button></div>
+   </div>
+   <h3>날짜별 단어장</h3>
+   ${dayKeys.length?`<ul class="dlist">${dayKeys.map(k=>{const s=dayStatus(att[k]);return `<li><div class="dhead"><input type="checkbox" id="c-${k}" data-c="${k}" ${selDays.has(k)?'checked':''}><label for="c-${k}"><b>${longDate(k)}</b> · ${days[k].length}단어<span class="chip ${s==='on'?'':s==='low'?'low':'none'}">${s==='on'?'출석':s==='low'?'부족':'시험 안 봄'}</span></label><button class="wtog" data-o="${k}">${openDays.has(k)?'접기':'단어 보기'}</button></div>
+     ${openDays.has(k)?`<div class="dwords">${days[k].map((w,i)=>`<button data-dk="${k}" data-di="${i}"><b>${esc(w.en)}</b> ${esc(w.ko)}</button>`).join('')}</div>`:''}</li>`}).join('')}</ul>`
+     :'<p class="hint">시험을 보면 그날 단어가 날짜별로 여기에 정리돼요.</p>'}
    <div class="row"><button class="btn" id="report">출석 리포트 복사</button></div><p class="msg" id="rmsg" style="color:var(--blue)"></p>`;
+  const A=$('acard');
   $('mprev').onclick=()=>{calMonth=m?[y,m-1]:[y-1,11];renderAtt()};$('mnext').onclick=()=>{calMonth=m<11?[y,m+1]:[y+1,0];renderAtt()};
+  const tog=k=>{selDays.has(k)?selDays.delete(k):selDays.add(k);renderAtt()};
+  A.querySelectorAll('button.day').forEach(b=>b.onclick=()=>{tog(b.dataset.k);if(selDays.has(b.dataset.k))A.querySelector('.selbar').scrollIntoView({behavior:'smooth',block:'nearest'})});
+  A.querySelectorAll('[data-c]').forEach(c=>c.onchange=()=>tog(c.dataset.c));
+  A.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const k=b.dataset.o;openDays.has(k)?openDays.delete(k):openDays.add(k);renderAtt()});
+  A.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>speak(sw[b.dataset.sw].en));
+  A.querySelectorAll('[data-dk]').forEach(b=>b.onclick=()=>speak(days[b.dataset.dk][b.dataset.di].en));
+  if(selDays.size){$('dquiz').onclick=()=>{const l=selWords();if(l.length)startQuiz(l.map(w=>({en:w.en,ko:w.ko})),'mix','days')};
+    $('dcards').onclick=()=>{startCards(selWords());show('cards')};$('dclear').onclick=()=>{selDays.clear();renderAtt()}}
   $('report').onclick=()=>{const ns=monthStats(now.getFullYear(),now.getMonth());
     const txt=`[공부하자] ${now.getMonth()+1}월 ${now.getDate()}일 출석 리포트\n오늘: ${td?(dayStatus(td)==='on'?'출석':'공부량 부족')+` (${td.words}단어, 시험 ${td.quizzes}회, 최고 ${td.best}/${td.total})`:'아직 안 함'}\n${now.getMonth()+1}월 출석률: ${ns.rate}% (출석 ${ns.on}일 · 부족 ${ns.low}일 / ${ns.days}일)\n연속 출석: ${streak()}일\n오답 노트: ${wrong.length}단어 (아직 못 외움 ${wrong.filter(w=>!w.ok).length})`;
     copy(txt,$('rmsg'),'복사했어요. 카톡에 붙여넣어 보내세요.')}};
@@ -444,7 +490,7 @@ $('voice').onchange=()=>save('vq_voice',$('voice').value);
 $('rate').value=String(load('vq_rate',0.9));$('rate').onchange=()=>save('vq_rate',+$('rate').value);
 $('rec').checked=useRec();$('rec').onchange=()=>save('vq_rec',$('rec').checked);
 $('vtest').onclick=()=>speak('interview');
-const KEYS=['vq_wrong','vq_att','vq_all','vq_since','vq_words'];
+const KEYS=['vq_wrong','vq_att','vq_all','vq_since','vq_words','vq_days'];
 $('bk').onclick=()=>{const o={};for(const k of KEYS)o[k]=load(k,null);copy(JSON.stringify(o),$('bkmsg'),'백업 코드를 복사했어요. 안전한 곳에 붙여넣어 두세요.')};
 $('rs').onclick=()=>{try{const o=JSON.parse($('bkin').value);if(!o||!('vq_wrong' in o))throw 0;for(const k of KEYS)if(o[k]!=null)save(k,o[k]);location.reload()}catch(e){$('bkmsg').textContent='백업 코드가 올바르지 않아요.'}};
 
