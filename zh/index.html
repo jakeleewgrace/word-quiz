@@ -494,14 +494,16 @@ const renderRec=()=>{const t=today(),todayIdx=rec.byDate[t];if(recView===null)re
   const cycle=Math.floor(recView/SETS.length);
   $('rec').innerHTML=`<div class="qtop"><span class="dir">오늘의 추천 단어</span><span>Day ${recView+1}${cycle?` (${cycle+1}회차 복습)`:''} · ${esc(set.t)}</span></div>
    <div class="recw">${set.w.map(([h,p,k],j)=>`<button data-r="${j}"><span class="hz">${esc(h)}</span> <span class="py" style="display:inline">${esc(p)}</span><br>${esc(k)}</button>`).join('')}</div>
-   <div class="row" style="margin-top:4px"><button class="btn sm" id="radd" style="flex:1" ${added?'disabled':''}>${added?'넣었어요':'이 10개 단어 목록에 넣기'}</button><button class="btn ghost sm" id="rprev" ${recView>0?'':'disabled'} aria-label="이전 세트">‹</button><button class="btn ghost sm" id="rnext" aria-label="다음 세트">›</button></div>
-   <p class="hint">매일 새 세트가 나와요 (총 ${SETS.length}일 치). 단어를 누르면 발음이 나와요. 아래에 내 단어장 단어를 더 넣어도 돼요.</p>`;
+   <div class="row" style="margin-top:4px"><button class="btn sm" id="radd" style="flex:1">${added?'+ 10개 더 추가하기':'이 10개 단어 목록에 넣기'}</button><button class="btn ghost sm" id="rprev" ${recView>0?'':'disabled'} aria-label="이전 세트">‹</button><button class="btn ghost sm" id="rnext" aria-label="다음 세트">›</button></div>
+   <p class="hint">${added?`오늘 ${(todayIdx||[]).length*10}개 넣었어요. 더 공부하고 싶으면 "10개 더 추가하기"를 누르세요. `:''}매일 새 세트가 나와요 (총 ${SETS.length}세트). 단어를 누르면 발음이 나와요. 아래에 내 단어장 단어를 더 넣어도 돼요.</p>`;
   $('rec').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>speak(set.w[b.dataset.r][0]));
   $('rprev').onclick=()=>{recView--;renderRec()};$('rnext').onclick=()=>{recView++;renderRec()};
-  $('radd').onclick=()=>{const have=new Set(parse($('words').value).map(w=>w.en));const lines=set.w.filter(([h])=>!have.has(h)).map(([h,p,k])=>`${h} ${p} ${k}`);
+  $('radd').onclick=()=>{if(added){recView=rec.next;addSet(recView);return}addSet(recView)}};
+const addSet=idx=>{const t=today(),set=SETS[((idx%SETS.length)+SETS.length)%SETS.length];{const have=new Set(parse($('words').value).map(w=>w.en));const lines=set.w.filter(([h])=>!have.has(h)).map(([h,p,k])=>`${h} ${p} ${k}`);
     const cur=$('words').value.trim();$('words').value=(cur?cur+'\n':'')+lines.join('\n');save('zq_words',$('words').value);
-    (rec.byDate[t]=rec.byDate[t]||[]).push(recView);if(recView>=rec.next)rec.next=recView+1;save('zq_rec',rec);
-    $('words').dispatchEvent(new Event('input'));renderRec()}};
+    (rec.byDate[t]=rec.byDate[t]||[]).push(idx);if(idx>=rec.next)rec.next=idx+1;save('zq_rec',rec);
+    $('words').dispatchEvent(new Event('input'));renderRec();
+    const n=(rec.byDate[t]||[]).length;if(n>1)$('wc').textContent=`지금 ${parse($('words').value).length}개 · 오늘 추천 세트 ${n}개째`}};
 const lastDay=load('zq_lastday','');if(lastDay&&lastDay!==today()){$('words').value='';save('zq_words','')}save('zq_lastday',today());
 renderRec();
 $('wc').textContent=`지금 ${parse($('words').value).length}개`;
